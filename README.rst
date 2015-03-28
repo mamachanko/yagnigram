@@ -11,10 +11,8 @@ yagnigram
 
 The Instagram command line client you ain't going to need.
 
-* Free software: BSD license
-* Documentation: https://yagnigram.readthedocs.org.
 
 Features
 --------
 
-* TODO
+* Documentation: https://yagnigram.readthedocs.org.
