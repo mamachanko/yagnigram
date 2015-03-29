@@ -55,5 +55,5 @@ if __name__ == '__main__':
                 token = f.readline()
         width = int(arguments['--width'])
         count = int(arguments['--count'])
-        for media in Feed(token, count=count, width=width):
-            print(media)
+        for feed_item in Feed(token, count=count):
+            print(feed_item.render(width))
