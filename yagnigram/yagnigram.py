@@ -25,6 +25,7 @@ Options:
 import sys
 import os
 
+import blessings
 from docopt import docopt
 
 from oauth import handle_oauth
@@ -32,7 +33,10 @@ from feed import Feed
 
 
 if __name__ == '__main__':
-    arguments = docopt(doc=__doc__, version='Yagnigram 0.1.0')
+    arguments = docopt(doc=__doc__, version='yagnigram 0.1.0')
+    terminal = blessings.Terminal()
+
+    print('Welcome to ' + terminal.bold('yagnigram'))
 
     if arguments['oauth']:
         output_file = os.path.expanduser(arguments['--outputfile'])
