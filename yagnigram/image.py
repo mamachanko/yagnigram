@@ -61,16 +61,13 @@ class UnicodeImage(object):
                 pixel_octet_values = self.get_values_for_pixel_octet(
                     pixel_octet)
                 background_color, text_color, braille_char = pixel_octet_values
-                row.append(UnicodePixel(braille_char,
-                                        background_color,
-                                        text_color))
+                row.append(
+                    UnicodePixel(braille_char, background_color, text_color)
+                )
 
             image_array.append(row)
 
         return image_array
-
-    def get_braille_chars(self):
-        pass
 
     def extract_gray_values(self, pixel_octet):
         lower_bound = self.encode_gray_value(min(pixel_octet))
