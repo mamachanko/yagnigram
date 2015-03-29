@@ -12,7 +12,7 @@ yagnigram
 The Instagram command line client you ain't going to need.
 
 
-Features
---------
+ToDos
+-----
 
 * Documentation: https://yagnigram.readthedocs.org.
