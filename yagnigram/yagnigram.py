@@ -1,6 +1,6 @@
 """
 Usage:
-    yagnigram feed [--count=<count>] [--no-images] [--use-cache] [--token=<token>] [--interactive] [--width=<width>] [--animate]
+    yagnigram feed [--count=<count>] [--no-images] [--use-cache] [--token=<token>] [--tokenfile=<tokenfile>] [--interactive] [--width=<width>] [--animate]
     yagnigram show <id>
     yagnigram oauth [--force] [--outputfile=<outputfile>]
     yagnigram flush_cache
@@ -15,6 +15,7 @@ Options:
     --no-images                does not download and render images
     --use-cache                uses local image cache
     --token=<token>            Instagram access token
+    --tokenfile=<tokenfile>    file containing the Instagram access token [default: ~/.yagnigram]
     --interactive              use interactive mode
     --animate                  animates videos
     --force                    overwrites the existing token
@@ -26,27 +27,33 @@ import os
 
 from docopt import docopt
 
-from oauth import get_oauth_token
-from feed import feed
+from oauth import handle_oauth
+from feed import Feed
 
 
 if __name__ == '__main__':
     arguments = docopt(doc=__doc__, version='Yagnigram 0.1.0')
 
     if arguments['oauth']:
-        token_file = os.path.expanduser(arguments['--outputfile'])
+        output_file = os.path.expanduser(arguments['--outputfile'])
         if arguments['--force']:
             try:
-                os.remove(token_file)
+                os.remove(output_file)
             except OSError:
                 pass
         raw_input('press any key to continue in the browser\n')
-        get_oauth_token(token_file=token_file)
-        print('\nYour Instagram access token has been written to  %s.' % token_file)
+        handle_oauth(output_file=output_file)
+        print('\nYour Instagram access token has been written to  %s.' % output_file)
         print('Thank you.')
 
     if arguments['feed']:
-        token = arguments['--token']
+        if arguments['--token']:
+            token = arguments['--token']
+        else:
+            token_file = os.path.expanduser(arguments['--tokenfile'])
+            with open(token_file, 'r') as f:
+                token = f.readline()
         width = int(arguments['--width'])
         count = int(arguments['--count'])
-        print(feed(count=count, width=width, token=token))
+        for media in Feed(token, count=count, width=width):
+            print(media)

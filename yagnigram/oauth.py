@@ -13,28 +13,18 @@ REDIRECT_URI = 'http://localhost:%s/' % PORT
 OAUTH_URL = 'https://instagram.com/oauth/authorize/?client_id=%s&redirect_uri=%s&response_type=token' % (CLIENT_ID, REDIRECT_URI)
 
 
-def get_oauth_token(token_file):
-    try:
-        with open(token_file, 'r') as f:
-            token = f.readline()
-    except IOError:
-        handle_oauth(token_file)
-    else:
-        return token
-
-
-def handle_oauth(token_file):
-    app = build_oauth_app(token_file)
+def handle_oauth(output_file):
+    app = build_oauth_app(output_file)
     with Server(app, PORT):
         browse_url(OAUTH_URL)
-        wait_for_file(token_file)
+        wait_for_file(output_file)
         time.sleep(1)
 
 
-def build_oauth_app(token_file):
+def build_oauth_app(output_file):
     app = falcon.API()
     app.add_route('/', OauthResource())
-    app.add_route('/{token}/', TokenResource(token_file))
+    app.add_route('/{token}/', TokenResource(output_file))
     return app
 
 
@@ -78,13 +68,13 @@ class OauthResource:
 
 class TokenResource:
 
-    def __init__(self, token_file):
-        self.token_file = token_file
+    def __init__(self, output_file):
+        self.output_file = output_file
 
     def on_get(self, req, resp, token):
         if token == 'favicon.ico':
             return
-        with open(self.token_file, 'w') as f:
+        with open(self.output_file, 'w') as f:
             f.write(token)
         resp.body = """
             <!DOCTYPE html>
@@ -101,5 +91,5 @@ class TokenResource:
                     <p><em>Thank you.</em></p>
                 </body>
             </html>
-        """ % os.path.abspath(self.token_file)
+        """ % os.path.abspath(self.output_file)
         resp.content_type = 'text/html'
