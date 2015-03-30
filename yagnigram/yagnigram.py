@@ -32,8 +32,8 @@ from oauth import handle_oauth
 from feed import Feed
 
 
-if __name__ == '__main__':
-    arguments = docopt(doc=__doc__, version='yagnigram 0.1.0')
+def main(argv=None):
+    arguments = docopt(doc=__doc__, argv=argv, version='yagnigram 0.1.0')
     terminal = blessings.Terminal()
 
     print('Welcome to ' + terminal.bold('yagnigram'))
@@ -61,3 +61,7 @@ if __name__ == '__main__':
         count = int(arguments['--count'])
         for feed_item in Feed(token, count=count):
             print(feed_item.render(width))
+
+
+if __name__ == '__main__':
+    main(sys.argv[1:])
