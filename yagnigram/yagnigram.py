@@ -75,8 +75,24 @@ class Yagnigram(object):
                 token = f.readline()
         width = int(self.arguments['--width'])
         count = int(self.arguments['--count'])
-        for feed_item in Feed(token, count=count):
-            print(feed_item.render(width))
+
+        if self.arguments['--interactive']:
+            try:
+                for feed_item in Feed(token, count=count):
+                    with self.terminal.fullscreen():
+                        
+                        with self.terminal.location(0, 0):
+                            width = min(self.terminal.width, self.terminal.height*2)*2
+                            print(feed_item.render(width))
+
+                        with self.terminal.location(0, self.terminal.height-1):
+                            raw_input('next (enter)')
+            except KeyboardInterrupt:
+                pass
+
+        else:
+            for feed_item in Feed(token, count=count):
+                print(feed_item.render(width))
 
 
 if __name__ == '__main__':
