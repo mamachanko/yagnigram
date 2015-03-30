@@ -2,6 +2,7 @@ import abc
 import tempfile
 import textwrap
 
+import arrow
 from instagram.client import InstagramAPI
 from PIL import Image
 import requests
@@ -52,4 +53,18 @@ class FeedItem(object):
             return error.msg
 
         unicode_image = UnicodeImage(self.image, width=width)
-        return '{}\n{}'.format(unicode_image, self.media.user.username)
+
+        ## WIP
+        import blessings
+        terminal = blessings.Terminal()
+
+        return '{}\n{} ({})\n{} likes\n({},...)\n{} comments\n({},...)'.format(
+            unicode_image,
+            terminal.bold(self.media.user.username),
+            arrow.get(self.media.created_time).humanize(),
+            self.media.like_count,
+            ', '.join(map(lambda user: user.username, self.media.likes)),
+            self.media.comment_count,
+            u', '.join(map(lambda comment: comment.user.username + u': ' + comment.text, self.media.comments))
+        )
+        #####
