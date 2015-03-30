@@ -32,15 +32,29 @@ from oauth import handle_oauth
 from feed import Feed
 
 
-def main(argv=None):
-    arguments = docopt(doc=__doc__, argv=argv, version='yagnigram 0.1.0')
-    terminal = blessings.Terminal()
+class Yagnigram(object):
 
-    print('Welcome to ' + terminal.bold('yagnigram'))
+    def __init__(self, argv):
+        self.argv = argv
 
-    if arguments['oauth']:
-        output_file = os.path.expanduser(arguments['--outputfile'])
-        if arguments['--force']:
+    @classmethod
+    def main(cls, argv=None):
+        cls(argv).run()
+
+    def run(self):
+        self.arguments = docopt(doc=__doc__, argv=self.argv, version='yagnigram 0.1.0')
+        terminal = blessings.Terminal()
+        print('Welcome to ' + terminal.bold('yagnigram'))
+
+        if self.arguments['oauth']:
+            self.on_oauth()
+
+        if self.arguments['feed']:
+            self.on_feed()
+
+    def on_oauth(self):
+        output_file = os.path.expanduser(self.arguments['--outputfile'])
+        if self.arguments['--force']:
             try:
                 os.remove(output_file)
             except OSError:
@@ -50,18 +64,18 @@ def main(argv=None):
         print('\nYour Instagram access token has been written to  %s.' % output_file)
         print('Thank you.')
 
-    if arguments['feed']:
-        if arguments['--token']:
-            token = arguments['--token']
+    def on_feed(self):
+        if self.arguments['--token']:
+            token = self.arguments['--token']
         else:
-            token_file = os.path.expanduser(arguments['--tokenfile'])
+            token_file = os.path.expanduser(self.arguments['--tokenfile'])
             with open(token_file, 'r') as f:
                 token = f.readline()
-        width = int(arguments['--width'])
-        count = int(arguments['--count'])
+        width = int(self.arguments['--width'])
+        count = int(self.arguments['--count'])
         for feed_item in Feed(token, count=count):
             print(feed_item.render(width))
 
 
 if __name__ == '__main__':
-    main(sys.argv[1:])
+    Yagnigram.main(sys.argv[1:])

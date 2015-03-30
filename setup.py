@@ -70,6 +70,6 @@ setup(
     test_suite='tests',
     tests_require=test_requirements,
     entry_points={
-            'console_scripts': ['yagnigram = yagnigram.yagnigram:main'],
+            'console_scripts': ['yagnigram = yagnigram.yagnigram:Yagnigram.main'],
     }
 )
