@@ -43,14 +43,16 @@ class Yagnigram(object):
 
     def run(self):
         self.arguments = docopt(doc=__doc__, argv=self.argv, version='yagnigram 0.1.0')
-        terminal = blessings.Terminal()
-        print('Welcome to ' + terminal.bold('yagnigram'))
+        self.terminal = blessings.Terminal()
+        print('Welcome to ' + self.terminal.bold('yagnigram') + '\n--')
 
         if self.arguments['oauth']:
             self.on_oauth()
 
         if self.arguments['feed']:
             self.on_feed()
+
+        print('--\nbye')
 
     def on_oauth(self):
         output_file = os.path.expanduser(self.arguments['--outputfile'])
