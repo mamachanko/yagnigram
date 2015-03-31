@@ -3,6 +3,7 @@ import tempfile
 import textwrap
 
 import arrow
+import blessings
 from instagram.client import InstagramAPI
 from PIL import Image
 import requests
@@ -54,17 +55,35 @@ class FeedItem(object):
 
         unicode_image = UnicodeImage(self.image, width=width)
 
-        ## WIP
-        import blessings
         terminal = blessings.Terminal()
 
-        return '{}\n{} ({})\n{} likes\n({},...)\n{} comments\n({},...)'.format(
-            unicode_image,
-            terminal.bold(self.media.user.username),
-            arrow.get(self.media.created_time).humanize(),
-            self.media.like_count,
-            ', '.join(map(lambda user: user.username, self.media.likes)),
-            self.media.comment_count,
-            u', '.join(map(lambda comment: comment.user.username + u': ' + comment.text, self.media.comments))
+        return u'{}\n{} ({})\n{} likes\n({},...)\n{} comments\n({},...)'.format(
+            self.render_image(),
+            terminal.bold(self.render_username()),
+            self.render_created_at(),
+            self.render_like_count(),
+            self.render_likes(),
+            self.render_comment_count(),
+            self.render_comments(width),
         )
-        #####
+
+    def render_image(self, width=150):
+        return UnicodeImage(self.image, width=width)
+
+    def render_username(self, width=None):
+        return self.media.user.username
+
+    def render_created_at(self, width=None):
+        return arrow.get(self.media.created_time).humanize()
+
+    def render_like_count(self, width=None):
+        return self.media.like_count
+
+    def render_likes(self, width=150):
+        return u', '.join(map(u'{0.username}'.format, self.media.likes))
+
+    def render_comment_count(self, width=None):
+        return unicode(self.media.comment_count)
+
+    def render_comments(self, width=None):
+        return u', '.join(map(u'{0.user.username}: {0.text}'.format, self.media.comments))
