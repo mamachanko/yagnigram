@@ -20,8 +20,11 @@ class UnicodeImage(object):
     def __repr__(self):
         return '\n'.join(self.get_lines())
 
+    def __unicode__(self):
+        return u'\n'.join(self.get_lines())
+
     def get_lines(self):
-        return [''.join(map(str, row)) for row in self.as_array]
+        return [u''.join(map(unicode, row)) for row in self.as_array]
 
     def get_pixel(self, x, y):
         return self.as_array[x][y]
@@ -116,7 +119,7 @@ class UnicodeImage(object):
         braille_char = reduce(make_dots, range(8), 0)
         braille_char = self.dot(braille_char)
 
-        return braille_char.encode('utf8')
+        return braille_char.encode('utf-8')
 
     def is_dot_set(self, gray_value, background_color, maximum_gray):
         background_color = self.decode_gray_value(background_color)
@@ -144,16 +147,22 @@ class UnicodeImage(object):
 class UnicodePixel(object):
 
     def __init__(self, character, background_colour, character_colour):
-        self.character = character
+        self.character = character.decode('utf-8')
         self.background_colour = background_colour
         self.character_colour = character_colour
 
     @property
     def ansii_sequence(self):
-        return '\033[48;5;{0}m\033[38;5;{1}m{2}\033[0m'.format(
+        return u'\033[48;5;{0}m\033[38;5;{1}m{2}\033[0m'.format(
             self.background_colour,
             self.character_colour,
             self.character)
 
     def __repr__(self):
+        raise ValueError('cannot represent as ASCII')
+
+    def __str__(self):
+        return self.__str__()
+
+    def __unicode__(self):
         return self.ansii_sequence
