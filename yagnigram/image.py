@@ -11,6 +11,7 @@ class UnicodeImage(object):
     def __init__(self, image, width=150):
         self.original_image = image
         self.ratio = .75 / .9
+        self.ratio = .5
         self.dimensions = (width, int(width * self.ratio))
         self.width, self.height = self.dimensions
         image = self.original_image.resize(self.dimensions, Image.BILINEAR)
@@ -24,6 +25,12 @@ class UnicodeImage(object):
         return u'\n'.join(self.get_lines())
 
     def get_lines(self):
+
+        rows = self.as_array
+        height, width = len(rows), len(rows[0])
+        dimensions = '{} x {}'.format(height, width)
+        rows.insert(0, '{:^{width}}'.format(dimensions, width=width))
+
         return [u''.join(map(unicode, row)) for row in self.as_array]
 
     def get_pixel(self, x, y):
