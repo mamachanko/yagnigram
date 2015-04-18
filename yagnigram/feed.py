@@ -14,21 +14,51 @@ from image import UnicodeImage
 
 class Feed(object):
 
-    def __init__(self, token, count=10):
+    def __init__(self, token):
         self.token = token
-        self.count = count
 
     def __iter__(self):
-        self.load()
-        for content in self.contents:
-            yield FeedItem(content)
-
-    def load(self):
         instagram_api = InstagramAPI(access_token=self.token)
-        self.contents, _ = instagram_api.user_media_feed(count=self.count)
+        for content, _ in instagram_api.user_media_feed(count=1, as_generator=True, max_pages=None):
+            media = Media(content[0])
+            media.load()
+            yield FeedItem(media)
 
 
 class FeedItem(object):
+
+    def __init__(self, media):
+        self.media = media
+        
+    def get_image(self, width=150):
+        return u'{}'.format(UnicodeImage(self.media.image, width=width))
+
+    def get_meta(self, width=150):
+        meta = [
+            self.media.username,
+            self.media.created_time,
+        ]
+
+        if self.media.like_count:
+            meta.extend([
+                '{} likes'.format(self.media.like_count),
+                '{}'.format(self.media.likes)
+            ])
+        else:
+            meta.append('no likes yet')
+
+        if self.media.comment_count:
+            meta.extend([
+                '{} comments'.format(self.media.comment_count),
+                '{}'.format(self.media.comments)
+            ])
+        else:
+            meta.append('no comments yet')
+
+        return u'\n'.join(meta)
+
+
+class Media(object):
 
     def __init__(self, media):
         self.media = media
@@ -41,49 +71,38 @@ class FeedItem(object):
                     f.write(chunk)
                 self.image = Image.open(f.name)
         else:
-            raise RunTimeError('could not load {}. http status: {}'.format(self.url, response.status_code))
+            error_message = "couldn't load {}. http status: {}".format(
+                self.url, response.status_code
+            )
+            raise RunTimeError(error_message)
 
     @property
     def url(self):
         return self.media.images.get('low_resolution').url
 
-    def render(self, width=150):
-        try:
-            self.load()
-        except RunTimeError as error:
-            return error.msg
+    #def image(self, width=150):
+    #    return UnicodeImage(self.image, width=width)
 
-        unicode_image = UnicodeImage(self.image, width=width)
-
-        terminal = blessings.Terminal()
-
-        return u'{}\n{} ({})\n{} likes\n({},...)\n{} comments\n({},...)'.format(
-            self.render_image(),
-            terminal.bold(self.render_username()),
-            self.render_created_at(),
-            self.render_like_count(),
-            self.render_likes(),
-            self.render_comment_count(),
-            self.render_comments(width),
-        )
-
-    def render_image(self, width=150):
-        return UnicodeImage(self.image, width=width)
-
-    def render_username(self, width=None):
+    @property
+    def username(self):
         return self.media.user.username
 
-    def render_created_at(self, width=None):
+    @property
+    def created_time(self):
         return arrow.get(self.media.created_time).humanize()
 
-    def render_like_count(self, width=None):
+    @property
+    def like_count(self):
         return self.media.like_count
 
-    def render_likes(self, width=150):
-        return u', '.join(map(u'{0.username}'.format, self.media.likes))
+    @property
+    def likes(self):
+        return map(u'{0.username}'.format, self.media.likes)
 
-    def render_comment_count(self, width=None):
-        return unicode(self.media.comment_count)
+    @property
+    def comment_count(self, width=None):
+        return self.media.comment_count
 
-    def render_comments(self, width=None):
-        return u', '.join(map(u'{0.user.username}: {0.text}'.format, self.media.comments))
+    @property
+    def comments(self):
+        return map(u'{0.user.username}: {0.text}'.format, self.media.comments)

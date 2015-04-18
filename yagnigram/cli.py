@@ -31,19 +31,21 @@ def logout():
 
 
 @cli.command('feed')
-@click.option('--width', default=100, help='The width of images and text')
-@click.option('--count', default=1, help='The number of posts to show')
-def _feed(width, count):
+def _feed():
     try:
         token = get_token()
     except IOError:
         click.echo('Could not read token from {}. Try `yagnigram login` first.'.format(TOKENFILE))
         return
 
-    for feed_item in feed.Feed(token, count=count):
-        print(feed_item.render(width))
+    terminal = blessings.Terminal()
+    for feed_item in feed.Feed(token):
+        with terminal.fullscreen():
+            print(feed_item.get_image(width=terminal.width))
+            print(feed_item.get_meta(width=terminal.width))
+            raw_input()
 
- 
+
 def remove_tokenfile():
     try:
         os.remove(TOKENFILE)
