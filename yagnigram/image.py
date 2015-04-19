@@ -8,29 +8,32 @@ class UnicodeImage(object):
     ADJUST_FACTOR = 1.5
     SCALE = 256/24.
 
-    def __init__(self, image, width=150):
+    def __init__(self, image, width=100, height=57):
         self.original_image = image
-        self.ratio = .75 / .9
-        self.ratio = .5
-        self.dimensions = (width, int(width * self.ratio))
+        #self.ratio = .75 / .9
+        #self.ratio = .5
+        self.dimensions = (width, height)
         self.width, self.height = self.dimensions
         image = self.original_image.resize(self.dimensions, Image.BILINEAR)
         self.image = ImageOps.grayscale(image)
         self.pixels = self.image.load()
 
+    @classmethod
+    def from_filename(cls, filename, width=100, height=57):
+        image = Image.open(filename)
+        return cls(image, width=width, height=height)
+
     def __repr__(self):
-        return '\n'.join(self.get_lines())
+        return '\n'.join(self.get_rows())
 
     def __unicode__(self):
-        return u'\n'.join(self.get_lines())
+        return u'\n'.join(self.get_rows())
 
-    def get_lines(self):
-
+    def get_rows(self):
         rows = self.as_array
-        height, width = len(rows), len(rows[0])
-        dimensions = '{} x {}'.format(height, width)
-        rows.insert(0, '{:^{width}}'.format(dimensions, width=width))
-
+        #height, width = len(rows), len(rows[0])
+        #dimensions = '{} x {}'.format(height, width)
+        #rows.insert(0, '{:^{width}}'.format(dimensions, width=width))
         return [u''.join(map(unicode, row)) for row in self.as_array]
 
     def get_pixel(self, x, y):
